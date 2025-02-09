@@ -1,11 +1,22 @@
 #include<iostream>
+#include <SFML/Graphics.hpp>
 #include <algorithm>  // For std::shuffle
 #include <random>     // For std::random_device and std::mt19937
 #include <vector>
+
 void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height) {
     int n = rectangles.size();
+    sf::Clock clock;
+
     for (int i = 0; i < n - 1; i++) {
         for (int j = 0; j < n - i - 1; j++) {
+            // Process window events (prevents freezing)
+            
+            while (const std::optional event=window.pollEvent()) {
+                if (event->is<sf::Event::Closed>())
+                    window.close();
+            }
+
             if (arr[j] > arr[j + 1]) {
                 // Swap values in array
                 std::swap(arr[j], arr[j + 1]);
@@ -16,18 +27,18 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
                 rectangles[j + 1].setSize({rectangles[j + 1].getSize().x, temp_height});
 
                 // Update rectangle positions to align from the bottom
-                rectangles[j].setPosition(sf::Vector2<float>(rectangles[j].getPosition().x, win_height - rectangles[j].getSize().y));
-                rectangles[j + 1].setPosition(sf::Vector2<float>(rectangles[j + 1].getPosition().x, win_height - rectangles[j + 1].getSize().y));
+                rectangles[j].setPosition({rectangles[j].getPosition().x, win_height - rectangles[j].getSize().y});
+                rectangles[j + 1].setPosition({rectangles[j + 1].getPosition().x, win_height - rectangles[j + 1].getSize().y});
 
-                // Clear and redraw window after each swap
+                // Clear and redraw window
                 window.clear();
                 for (const auto& rect : rectangles) {
                     window.draw(rect);
                 }
                 window.display();
 
-                // **Increase delay here** to slow down sorting
-                sf::sleep(sf::milliseconds(500));  // Try 200ms or higher for a slower effect
+                // **Introduce delay without freezing**
+                sf::sleep(sf::milliseconds(1000/n)); // Adjust to control speed
             }
         }
     }

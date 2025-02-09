@@ -3,20 +3,15 @@
 #include <vector>
 #include <Sorting.hpp>
 
-// Function declaration for bubble_sort
-
-
-// Function to create rectangles that fully spread across the window
 std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_width, float win_height) {
     std::vector<sf::RectangleShape> rectangles;
     float rect_width = win_width / count;
     float spacing = rect_width;
-//Finding max height and adjusting the height of the bars
+
     float max_height = *std::max_element(arr, arr + count);
     float max_bar_height = win_height * 0.8;
 
     for (int i = 0; i < count; i++) {
-        // Scale height dynamically
         float scaled_height = (arr[i] / max_height) * max_bar_height;
 
         sf::RectangleShape rect(sf::Vector2f(rect_width - 2, scaled_height));
@@ -29,16 +24,14 @@ std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_
     return rectangles;
 }
 
-
 int main() {
-    std::srand(std::time(0)); // Seed random values
+    std::srand(std::time(0));
 
-    // User input for number of elements
     int n;
     std::cout << "Enter the number of elements: ";
     std::cin >> n;
 
-    std::vector<int> arr = rand_array(n); // Generate random heights
+    std::vector<int> arr = rand_array(n);
 
     std::cout << "Generated heights: ";
     for (int i = 0; i < n; i++) {
@@ -50,28 +43,60 @@ int main() {
     unsigned int win_height = 600;
     sf::RenderWindow window(sf::VideoMode({win_width, win_height}), "Sorting Visualizer");
 
-    // Generate rectangles
     std::vector<sf::RectangleShape> rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
-    bubble_sort(arr.data(), rectangles, window, win_height);
+
+    // Start button setup
+    sf::RectangleShape startButton(sf::Vector2f(100, 50));
+    startButton.setFillColor(sf::Color::White);
+    startButton.setPosition({win_width / 2 - 50, win_height - 580});
+
+    sf::Font font;
+    if (!font.openFromFile("arial.ttf")) {
+        std::cerr << "Error loading font\n";
+        return -1;
+    }
+
+    sf::Text startText(font);
+    startText.setFont(font);
+    startText.setString("Start");
+    startText.setFillColor(sf::Color::Black);
+    startText.setPosition({win_width / 2 - 30, win_height- 570});
+
+    bool sortingStarted = false;
+
     while (window.isOpen()) {
        
-        while (const std::optional event=window.pollEvent()) {
+        while ( std::optional event=window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
                 window.close();
+
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                if (startButton.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                    sortingStarted = true;
+                }
+            }
         }
 
         window.clear();
 
-
-
-        // Draw all rectangles
+        // Draw rectangles
         for (const auto& rect : rectangles) {
             window.draw(rect);
         }
 
+        // Draw start button and text
+        window.draw(startButton);
+        window.draw(startText);
+
         window.display();
+
+        // Start sorting if button was clicked
+        if (sortingStarted) {
+            bubble_sort(arr.data(), rectangles, window, win_height);
+            sortingStarted = false;
+        }
     }
 
-    
     return 0;
 }
