@@ -39,8 +39,8 @@ int main() {
     }
     std::cout << std::endl;
 
-    unsigned int win_width = 800;
-    unsigned int win_height = 600;
+     float win_width = 800;
+     float win_height = 600;
     sf::RenderWindow window(sf::VideoMode({win_width, win_height}), "Sorting Visualizer");
 
     std::vector<sf::RectangleShape> rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
