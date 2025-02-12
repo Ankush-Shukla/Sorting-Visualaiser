@@ -3,14 +3,7 @@
 #include <vector>
 #include <Sorting.hpp>
 #include <SFML/Audio.hpp>
-void play(int pitch){
-std::srand(std::time(0));
-    sf::Music music;
-    if (!music.openFromFile("beep.ogg"))
-        std::cerr << "Error loading music\n";
-    
-    music.play();
-}
+
 std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_width, float win_height) {
     std::vector<sf::RectangleShape> rectangles;
     float rect_width = win_width / count;
@@ -33,7 +26,9 @@ std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_
 }
 
 int main() {
-    
+  
+       
+
     int n;
     std::cout << "Enter the number of elements: ";
     std::cin >> n;
