@@ -1,9 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
-#include <Sorting.hpp>
+#include "Sorting.hpp"
 #include <SFML/Audio.hpp>
-
 std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_width, float win_height) {
     std::vector<sf::RectangleShape> rectangles;
     float rect_width = win_width / count;
@@ -43,7 +42,7 @@ int main() {
 
      float win_width = 800;
      float win_height = 600;
-    sf::RenderWindow window(sf::VideoMode({win_width, win_height}), "Sorting Visualizer");
+    sf::RenderWindow window(sf::VideoMode({(unsigned int)win_width, (unsigned int)win_height}), "Sorting Visualizer");
 
     std::vector<sf::RectangleShape> rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
 
@@ -70,6 +69,7 @@ int main() {
        
         while ( std::optional event=window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
+                
                 window.close();
 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
@@ -90,8 +90,9 @@ int main() {
         // Draw start button and text
         window.draw(startButton);
         window.draw(startText);
-
+      
         window.display();
+      
 
         // Start sorting if button was clicked
         if (sortingStarted) {

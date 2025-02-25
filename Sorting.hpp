@@ -5,58 +5,43 @@
 #include<random>
 #include <algorithm>
 #include <iostream>  
-#include <memory>  // ✅ Required for std::unique_ptr
-
-void generateTone(sf::SoundBuffer &buffer, float frequency, float duration = 0.2f, int sampleRate = 44100) {
-    int sampleCount = static_cast<int>(sampleRate * duration);
-    std::vector<std::int16_t> samples(sampleCount);
-
-    for (int i = 0; i < sampleCount; i++) {
-        float amplitude = 30000; // Volume
-        samples[i] = static_cast<std::int16_t>(amplitude * std::sin(2 * 3.14159265 * frequency * i / sampleRate));
-    }
-
-    unsigned int channelCount = 2;  
-    std::vector<sf::SoundChannel> channelMap = {sf::SoundChannel::FrontLeft, sf::SoundChannel::FrontRight};
-
-    if (!buffer.loadFromSamples(samples.data(), sampleCount, channelCount, sampleRate, channelMap)) {
-        std::cerr << "Error loading sound buffer!\n";
-    }
-}
-
+#include <memory> 
+sf::SoundBuffer b("beep.wav");
+sf::Sound sorting(b); 
 void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height) {
-    std::srand(std::time(0));
     int n = rectangles.size();
 
-    // ✅ Fix: Use unique_ptr to store sounds
-    std::vector<std::unique_ptr<sf::Sound>> sounds;
+    
+
+    float max_height = 0;
+    for (const auto& rect : rectangles) {
+        max_height = std::max(max_height, rect.getSize().y);
+    }
 
     for (int i = 0; i < n - 1; i++) {
+        bool swapped = false; // Track if any swaps happen
+
         for (int j = 0; j < n - i - 1; j++) {
-            while (std::optional<sf::Event> event = window.pollEvent()) {
-                if (event->is<sf::Event::Closed>())
+            while (std::optional event = window.pollEvent()) {
+                if (event->is<sf::Event::Closed>()) {
                     window.close();
+                    return;
+                }
             }
 
-            // Generate a tone based on height
-            float frequency = 200 + (rectangles[j].getSize().y / win_height) * 800;
-            sf::SoundBuffer buffer;
-            generateTone(buffer, frequency);
-
-            // ✅ Fix: Use unique_ptr for sf::Sound
-            sounds.emplace_back(std::make_unique<sf::Sound>(buffer));
-            sounds.back()->play();
-
-            std::cout << "Playing sound with frequency: " << frequency << " Hz\n";
-
             rectangles[j].setFillColor(sf::Color::Red);
-            rectangles[j + 1].setFillColor(sf::Color::Red);
+            rectangles[j + 1].setFillColor(sf::Color::Yellow);
+
+            float relative_height = rectangles[j].getSize().y / max_height;
+            sorting.setPitch(0.5f + 0.5f * relative_height);
+            sorting.play();
+            sf::sleep(sf::milliseconds(1000/n+25));
 
             window.clear();
-            for (const auto& rect : rectangles) window.draw(rect);
+            for (const auto& rect : rectangles) {
+                window.draw(rect);
+            }
             window.display();
-
-            sf::sleep(sf::milliseconds(1000 / n));
 
             rectangles[j].setFillColor(sf::Color::White);
             rectangles[j + 1].setFillColor(sf::Color::White);
@@ -70,12 +55,17 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
 
                 rectangles[j].setPosition({rectangles[j].getPosition().x, win_height - rectangles[j].getSize().y});
                 rectangles[j + 1].setPosition({rectangles[j + 1].getPosition().x, win_height - rectangles[j + 1].getSize().y});
+                
+                swapped = true; // A swap occurred
             }
+        }
+
+        // If no swaps happened, the array is already sorted
+        if (!swapped) {
+            break;
         }
     }
 }
-
-
 void selection_sort(int arr[], int n) {
     for (int i = 0; i < n - 1; i++) {
         int min_index = i;
@@ -179,4 +169,3 @@ std::vector<int> rand_array(int n) {
     std::shuffle(arr.begin(), arr.end(), g);
     return arr;
 }
-
