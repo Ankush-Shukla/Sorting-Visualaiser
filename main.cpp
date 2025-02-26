@@ -15,7 +15,7 @@ std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_
         float scaled_height = (arr[i] / max_height) * max_bar_height;
 
         sf::RectangleShape rect(sf::Vector2f(rect_width - 2, scaled_height));
-        rect.setFillColor(sf::Color::Red);
+        rect.setFillColor(sf::Color::White);
         float x_position = i * spacing;
         rect.setPosition({x_position, win_height - scaled_height});
         rectangles.push_back(rect);
@@ -96,10 +96,12 @@ int main() {
 
         // Start sorting if button was clicked
         if (sortingStarted) {
-            bubble_sort(arr.data(), rectangles, window, win_height);
+            selection_sort(arr.data(), rectangles, window, win_height);
+            // bubble_sort(arr.data(), rectangles, window, win_height);
             sortingStarted = false;
         }
     }
+
 
     return 0;
 }

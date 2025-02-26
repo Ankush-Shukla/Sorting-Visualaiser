@@ -8,15 +8,23 @@
 #include <memory> 
 sf::SoundBuffer b("beep.wav");
 sf::Sound sorting(b); 
+
+float generatePitch(std::vector<sf::RectangleShape>& rectangles , int j){
+    float max_height = 0;
+    float relative_height=0;
+    for (const auto& rect : rectangles) {
+        max_height = std::max(max_height, rect.getSize().y);
+    relative_height = rectangles[j].getSize().y / max_height;
+    
+
+  }
+  return 0.5f + 0.5f * relative_height;
+}
 void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height) {
     int n = rectangles.size();
 
     
-
-    float max_height = 0;
-    for (const auto& rect : rectangles) {
-        max_height = std::max(max_height, rect.getSize().y);
-    }
+    
 
     for (int i = 0; i < n - 1; i++) {
         bool swapped = false; // Track if any swaps happen
@@ -30,10 +38,11 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
             }
 
             rectangles[j].setFillColor(sf::Color::Red);
-            rectangles[j + 1].setFillColor(sf::Color::Yellow);
+            rectangles[j + 1].setFillColor(sf::Color::Green);
 
-            float relative_height = rectangles[j].getSize().y / max_height;
-            sorting.setPitch(0.5f + 0.5f * relative_height);
+            
+            float pitch = generatePitch(rectangles,j);
+            sorting.setPitch(pitch);
             sorting.play();
             sf::sleep(sf::milliseconds(1000/n+25));
 
@@ -66,19 +75,79 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
         }
     }
 }
-void selection_sort(int arr[], int n) {
+void selection_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height) {
+    int n = rectangles.size();
+
     for (int i = 0; i < n - 1; i++) {
         int min_index = i;
+        bool swapped = false;
+        // Keep min_index as RED at start of each pass
+        rectangles[min_index].setFillColor(sf::Color::Red);
+
         for (int j = i + 1; j < n; j++) {
-            if (arr[j] < arr[min_index]) {
-                min_index = j;
+            while (std::optional event = window.pollEvent()) {
+                if (event->is<sf::Event::Closed>()) {
+                    window.close();
+                    return;
+                }
             }
+
+            // Highlight the current element as GREEN
+            rectangles[j].setFillColor(sf::Color::Green);
+
+            float pitch = generatePitch(rectangles,j);
+            sorting.setPitch(pitch);
+            sorting.play();
+           sf::sleep(sf::milliseconds(10));
+            
+            
+
+            // Render
+            window.clear();
+            for (const auto& rect : rectangles) {
+                window.draw(rect);
+            }
+            window.display();
+
+            sf::sleep(sf::milliseconds(50)); // Delay for visualization
+
+            // If a smaller element is found, update min_index
+            if (arr[j] < arr[min_index]) {
+
+                min_index = j; // Update min_index (but keep both RED and GREEN until swap)
+                rectangles[min_index].setFillColor(sf::Color::Red);
+                swapped = true;
+            }
+
+            // Reset the traversing element (j) back to WHITE after comparison
+            rectangles[j].setFillColor(sf::Color::White);
         }
-        int temp = arr[i];
-        arr[i] = arr[min_index];
-        arr[min_index] = temp;
+
+        // Swap the found minimum element with the first unsorted element
+        std::swap(arr[i], arr[min_index]);
+
+        // Swap rectangle heights
+        float temp_height = rectangles[i].getSize().y;
+        rectangles[i].setSize({rectangles[i].getSize().x, rectangles[min_index].getSize().y});
+        rectangles[min_index].setSize({rectangles[min_index].getSize().x, temp_height});
+
+        // Adjust positions
+        rectangles[i].setPosition({rectangles[i].getPosition().x, win_height - rectangles[i].getSize().y});
+        rectangles[min_index].setPosition({rectangles[min_index].getPosition().x, win_height - rectangles[min_index].getSize().y});
+
+        // Mark the sorted element as BLUE
+        rectangles[i].setFillColor(sf::Color::Blue);
+        // if (!swapped) {
+        //     break;
+        // }
     }
+
+    // Mark the last element as sorted
+    rectangles[n - 1].setFillColor(sf::Color::Blue);
+   
 }
+
+
 void insertion_sort(int arr[], int n) {
     for (int i = 1; i < n; i++) {
         int key = arr[i];
