@@ -7,24 +7,24 @@
 #include <iostream>  
 #include <memory> 
 sf::SoundBuffer b("beep.wav");
-sf::Sound sorting(b); 
+sf::Sound sorting(b);
 
-float generatePitch(std::vector<sf::RectangleShape>& rectangles , int j){
+float generatePitch(std::vector<sf::RectangleShape>& rectangles, int j) {
     float max_height = 0;
-    float relative_height=0;
+    float relative_height = 0;
     for (const auto& rect : rectangles) {
         max_height = std::max(max_height, rect.getSize().y);
-    relative_height = rectangles[j].getSize().y / max_height;
-    
+        relative_height = rectangles[j].getSize().y / max_height;
 
-  }
-  return 0.5f + 0.5f * relative_height;
+
+    }
+    return 0.5f + 0.5f * relative_height;
 }
 void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height) {
     int n = rectangles.size();
 
-    
-    
+
+
 
     for (int i = 0; i < n - 1; i++) {
         bool swapped = false; // Track if any swaps happen
@@ -40,11 +40,11 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
             rectangles[j].setFillColor(sf::Color::Red);
             rectangles[j + 1].setFillColor(sf::Color::Green);
 
-            
-            float pitch = generatePitch(rectangles,j);
+
+            float pitch = generatePitch(rectangles, j);
             sorting.setPitch(pitch);
             sorting.play();
-            sf::sleep(sf::milliseconds(1000/n+25));
+            sf::sleep(sf::milliseconds(1000 / n + 25));
 
             window.clear();
             for (const auto& rect : rectangles) {
@@ -59,12 +59,12 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
                 std::swap(arr[j], arr[j + 1]);
 
                 float temp_height = rectangles[j].getSize().y;
-                rectangles[j].setSize({rectangles[j].getSize().x, rectangles[j + 1].getSize().y});
-                rectangles[j + 1].setSize({rectangles[j + 1].getSize().x, temp_height});
+                rectangles[j].setSize({ rectangles[j].getSize().x, rectangles[j + 1].getSize().y });
+                rectangles[j + 1].setSize({ rectangles[j + 1].getSize().x, temp_height });
 
-                rectangles[j].setPosition({rectangles[j].getPosition().x, win_height - rectangles[j].getSize().y});
-                rectangles[j + 1].setPosition({rectangles[j + 1].getPosition().x, win_height - rectangles[j + 1].getSize().y});
-                
+                rectangles[j].setPosition({ rectangles[j].getPosition().x, win_height - rectangles[j].getSize().y });
+                rectangles[j + 1].setPosition({ rectangles[j + 1].getPosition().x, win_height - rectangles[j + 1].getSize().y });
+
                 swapped = true; // A swap occurred
             }
         }
@@ -95,12 +95,14 @@ void selection_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::
             // Highlight the current element as GREEN
             rectangles[j].setFillColor(sf::Color::Green);
 
-            float pitch = generatePitch(rectangles,j);
-            sorting.setPitch(pitch);
+            float pitch = generatePitch(rectangles, j);
+
+            int delay = std::max(5, 1000 / (n + 5));  // Ensure minimum delay
+            sorting.setPitch(generatePitch(rectangles, j));
             sorting.play();
-           sf::sleep(sf::milliseconds(10));
-            
-            
+            sf::sleep(sf::milliseconds(delay));
+
+
 
             // Render
             window.clear();
@@ -128,15 +130,15 @@ void selection_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::
 
         // Swap rectangle heights
         float temp_height = rectangles[i].getSize().y;
-        rectangles[i].setSize({rectangles[i].getSize().x, rectangles[min_index].getSize().y});
-        rectangles[min_index].setSize({rectangles[min_index].getSize().x, temp_height});
+        rectangles[i].setSize({ rectangles[i].getSize().x, rectangles[min_index].getSize().y });
+        rectangles[min_index].setSize({ rectangles[min_index].getSize().x, temp_height });
 
         // Adjust positions
-        rectangles[i].setPosition({rectangles[i].getPosition().x, win_height - rectangles[i].getSize().y});
-        rectangles[min_index].setPosition({rectangles[min_index].getPosition().x, win_height - rectangles[min_index].getSize().y});
+        rectangles[i].setPosition({ rectangles[i].getPosition().x, win_height - rectangles[i].getSize().y });
+        rectangles[min_index].setPosition({ rectangles[min_index].getPosition().x, win_height - rectangles[min_index].getSize().y });
 
         // Mark the sorted element as BLUE
-        rectangles[i].setFillColor(sf::Color::Blue);
+        rectangles[i].setFillColor(sf::Color::White);
         // if (!swapped) {
         //     break;
         // }
@@ -144,7 +146,7 @@ void selection_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::
 
     // Mark the last element as sorted
     rectangles[n - 1].setFillColor(sf::Color::Blue);
-   
+
 }
 
 
