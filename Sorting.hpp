@@ -43,6 +43,7 @@ void bubble_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::Ren
 
             float pitch = generatePitch(rectangles, j);
             sorting.setPitch(pitch);
+            sorting.setVolume(50);
             sorting.play();
             sf::sleep(sf::milliseconds(1000 / n + 25));
 
@@ -97,8 +98,9 @@ void selection_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::
 
             float pitch = generatePitch(rectangles, j);
 
-            int delay = std::max(5, 1000 / (n + 5));  // Ensure minimum delay
+            int delay = std::max(5, 1000 / (n + 1));  // Ensure minimum delay
             sorting.setPitch(generatePitch(rectangles, j));
+            sorting.setVolume(50);
             sorting.play();
             sf::sleep(sf::milliseconds(delay));
 
