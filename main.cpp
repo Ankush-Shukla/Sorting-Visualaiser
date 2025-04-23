@@ -96,8 +96,32 @@ int main() {
 
         // Start sorting if button was clicked
         if (sortingStarted) {
-            selection_sort(arr.data(), rectangles, window, win_height);
-            // bubble_sort(arr.data(), rectangles, window, win_height);
+            //implementing switch to choose sorting algorithm
+            std::cout << "Choose sorting algorithm:\n1. Bubble Sort\n2. Selection Sort\n3. Insertion Sort\n4. Merge Sort\n";
+            int choice;
+            std::cin >> choice;
+            switch (choice) {
+                case 1:
+                    std::cout << "Bubble Sort selected\n";
+                    bubble_sort(arr.data(), rectangles, window, win_height);
+                    break;
+                case 2:
+                    std::cout << "Selection Sort selected\n";
+                    selection_sort(arr.data(), rectangles, window, win_height);
+                    break;
+                case 3:
+                    std::cout << "Insertion Sort selected\n";
+                    insertion_sort(arr.data(), rectangles, window, win_height);    
+                    break;
+                case 4:
+                    std::cout << "Merge Sort selected\n";
+                    // merge_sort(arr.data(), rectangles, window, win_height, left , right)
+                    break;
+                default:
+                    std::cout << "Invalid choice, defaulting to Bubble Sort\n";
+                    
+            }
+
             sortingStarted = false;
         }
     }

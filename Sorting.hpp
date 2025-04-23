@@ -152,17 +152,135 @@ void selection_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::
 }
 
 
-void insertion_sort(int arr[], int n) {
+void insertion_sort(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height) {
+    int n = rectangles.size();
+
     for (int i = 1; i < n; i++) {
         int key = arr[i];
+        float key_height = rectangles[i].getSize().y;
         int j = i - 1;
+
+        rectangles[i].setFillColor(sf::Color::Red); // Current element being inserted
+
         while (j >= 0 && arr[j] > key) {
+            while (std::optional event = window.pollEvent()) {
+                if (event->is<sf::Event::Closed>()) {
+                    window.close();
+                    return;
+                }
+            }
+
+            rectangles[j].setFillColor(sf::Color::Green);
+
+            float pitch = generatePitch(rectangles, j);
+            sorting.setPitch(pitch);
+            sorting.setVolume(50);
+            sorting.play();
+
+            // Shift elements
             arr[j + 1] = arr[j];
+            rectangles[j + 1].setSize({rectangles[j + 1].getSize().x, rectangles[j].getSize().y});
+            rectangles[j + 1].setPosition({rectangles[j + 1].getPosition().x, win_height - rectangles[j + 1].getSize().y});
+
+            window.clear();
+            for (const auto& rect : rectangles) {
+                window.draw(rect);
+            }
+            window.display();
+
+            sf::sleep(sf::milliseconds(1000 / n + 25));
+            rectangles[j].setFillColor(sf::Color::White);
+            
             j--;
         }
         arr[j + 1] = key;
+        rectangles[j + 1].setSize({rectangles[j + 1].getSize().x, key_height});
+        rectangles[j + 1].setPosition({rectangles[j + 1].getPosition().x, win_height - key_height});
+        rectangles[j + 1].setFillColor(sf::Color::White);
     }
 }
+
+void merge_sort_visualization(int arr[], std::vector<sf::RectangleShape>& rectangles, sf::RenderWindow& window, float win_height, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        merge_sort_visualization(arr, rectangles, window, win_height, left, mid);
+        merge_sort_visualization(arr, rectangles, window, win_height, mid + 1, right);
+
+        // Merge visualization
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+        std::vector<int> L(n1), R(n2);
+        std::vector<float> L_heights(n1), R_heights(n2);
+
+        // Copy data to temp arrays
+        for (int i = 0; i < n1; i++) {
+            L[i] = arr[left + i];
+            L_heights[i] = rectangles[left + i].getSize().y;
+        }
+        for (int i = 0; i < n2; i++) {
+            R[i] = arr[mid + 1 + i];
+            R_heights[i] = rectangles[mid + 1 + i].getSize().y;
+        }
+
+        int i = 0, j = 0, k = left;
+
+        while (i < n1 && j < n2) {
+            while (std::optional event = window.pollEvent()) {
+                if (event->is<sf::Event::Closed>()) {
+                    window.close();
+                    return;
+                }
+            }
+
+            rectangles[k].setFillColor(sf::Color::Red);
+            
+            float pitch = generatePitch(rectangles, k);
+            sorting.setPitch(pitch);
+            sorting.setVolume(50);
+            sorting.play();
+
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                rectangles[k].setSize({rectangles[k].getSize().x, L_heights[i]});
+                i++;
+            } else {
+                arr[k] = R[j];
+                rectangles[k].setSize({rectangles[k].getSize().x, R_heights[j]});
+                j++;
+            }
+            rectangles[k].setPosition({rectangles[k].getPosition().x, win_height - rectangles[k].getSize().y});
+
+            window.clear();
+            for (const auto& rect : rectangles) {
+                window.draw(rect);
+            }
+            window.display();
+
+            sf::sleep(sf::milliseconds(1000 / rectangles.size() + 25));
+            rectangles[k].setFillColor(sf::Color::White);
+            k++;
+        }
+
+        // Copy remaining elements
+        while (i < n1) {
+            arr[k] = L[i];
+            rectangles[k].setSize({rectangles[k].getSize().x, L_heights[i]});
+            rectangles[k].setPosition({rectangles[k].getPosition().x, win_height - rectangles[k].getSize().y});
+            i++;
+            k++;
+        }
+
+        while (j < n2) {
+            arr[k] = R[j];
+            rectangles[k].setSize({rectangles[k].getSize().x, R_heights[j]});
+            rectangles[k].setPosition({rectangles[k].getPosition().x, win_height - rectangles[k].getSize().y});
+            j++;
+            k++;
+        }
+    }
+}
+
 void merge(int arr[], int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
