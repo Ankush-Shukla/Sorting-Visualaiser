@@ -80,7 +80,8 @@ int main() {
             }
         }
 
-        window.clear();
+       
+         window.clear();
 
         // Draw rectangles
         for (const auto& rect : rectangles) {
@@ -92,7 +93,6 @@ int main() {
         window.draw(startText);
       
         window.display();
-      
 
         // Start sorting if button was clicked
         if (sortingStarted) {
@@ -100,6 +100,7 @@ int main() {
             std::cout << "Choose sorting algorithm:\n1. Bubble Sort\n2. Selection Sort\n3. Insertion Sort\n4. Merge Sort\n";
             int choice;
             std::cin >> choice;
+  
             switch (choice) {
                 case 1:
                     std::cout << "Bubble Sort selected\n";
@@ -115,15 +116,17 @@ int main() {
                     break;
                 case 4:
                     std::cout << "Merge Sort selected\n";
-                    // merge_sort(arr.data(), rectangles, window, win_height, left , right)
+                    merge_sort_visualization(arr.data(), rectangles, window, win_height, 0, n - 1);
                     break;
                 default:
                     std::cout << "Invalid choice, defaulting to Bubble Sort\n";
                     
             }
+        
 
             sortingStarted = false;
         }
+      
     }
 
 
