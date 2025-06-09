@@ -120,6 +120,7 @@ int main() {
                     break;
                 default:
                     std::cout << "Invalid choice, defaulting to Bubble Sort\n";
+                    bubble_sort(arr.data(), rectangles, window, win_height);
                     
             }
         
