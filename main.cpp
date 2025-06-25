@@ -1,135 +1,244 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
-#include "Sorting.hpp"
+#include "SortingAlgorithms.hpp"
+#include "Sorting.hpp" // for rand_array
+#include "Visualization.hpp"
+#include "AudioManager.hpp"
 #include <SFML/Audio.hpp>
-std::vector<sf::RectangleShape> draw_rectangles(int arr[], int count, float win_width, float win_height) {
-    std::vector<sf::RectangleShape> rectangles;
-    float rect_width = win_width / count;
-    float spacing = rect_width;
 
-    float max_height = *std::max_element(arr, arr + count);
-    float max_bar_height = win_height * 0.8;
-
-    for (int i = 0; i < count; i++) {
-        float scaled_height = (arr[i] / max_height) * max_bar_height;
-
-        sf::RectangleShape rect(sf::Vector2f(rect_width - 2, scaled_height));
-        rect.setFillColor(sf::Color::White);
-        float x_position = i * spacing;
-        rect.setPosition({x_position, win_height - scaled_height});
-        rectangles.push_back(rect);
-    }
-
-    return rectangles;
-}
+// Enum for sorting algorithm selection
+enum class SortType {
+    Bubble = 1,
+    Selection = 2,
+    Insertion = 3,
+    Merge = 4
+};
 
 int main() {
-  
-       
+    // Initial array size and speed settings
+    int n = 50;
+    int min_n = 5, max_n = 200;
+    int speed = 50;
+    int min_speed = 1, max_speed = 500;
 
-    int n;
-    std::cout << "Enter the number of elements: ";
-    std::cin >> n;
-
+    // Generate the initial random array
     std::vector<int> arr = rand_array(n);
 
-    std::cout << "Generated heights: ";
-    for (int i = 0; i < n; i++) {
-        std::cout << arr[i] << " ";
-    }
-    std::cout << std::endl;
-
-     float win_width = 800;
-     float win_height = 600;
+    // Window setup
+    float win_width = 800;
+    float win_height = 600;
     sf::RenderWindow window(sf::VideoMode({(unsigned int)win_width, (unsigned int)win_height}), "Sorting Visualizer");
 
+    // Create the rectangles for visualization
     std::vector<sf::RectangleShape> rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
 
-    // Start button setup
-    sf::RectangleShape startButton(sf::Vector2f(100, 50));
+    // Start button
+    sf::RectangleShape startButton({100, 50});
     startButton.setFillColor(sf::Color::White);
     startButton.setPosition({win_width / 2 - 50, win_height - 580});
 
+    // Load font for UI
     sf::Font font;
     if (!font.openFromFile("arial.ttf")) {
-        std::cerr << "Error loading font\n";
+        std::cerr << "Error: Could not load font file 'arial.ttf'. Please ensure the file exists in the working directory.\n";
         return -1;
     }
 
+    // Start button label
     sf::Text startText(font);
     startText.setFont(font);
     startText.setString("Start");
     startText.setFillColor(sf::Color::Black);
     startText.setPosition({win_width / 2 - 30, win_height- 570});
 
-    bool sortingStarted = false;
+    // Load beep sound for sorting
+    sf::SoundBuffer beepBuffer;
+    if (!loadBeepSound(beepBuffer, "beep.wav")) {
+        std::cerr << "Failed to load beep.wav. Exiting.\n";
+        return -1;
+    }
+    sf::Sound sortingSound(beepBuffer);
 
+    bool sortingStarted = false;
+    SortType selectedSort = SortType::Bubble;
+
+    // Sorting algorithm selection buttons
+    std::vector<std::pair<sf::RectangleShape, sf::Text>> sortButtons;
+    std::vector<std::string> sortNames = {"Bubble", "Selection", "Insertion", "Merge"};
+    for (int i = 0; i < 4; ++i) {
+        sf::RectangleShape btn({120, 40});
+        btn.setFillColor(sf::Color(200, 200, 200));
+        btn.setPosition({win_width / 2 - 60, win_height - 520 + i * 60});
+        sf::Text txt(font);
+        txt.setString(sortNames[i] + " Sort");
+        txt.setFillColor(sf::Color::Black);
+        txt.setPosition({win_width / 2 - 50, win_height - 510 + i * 60});
+        sortButtons.emplace_back(btn, txt);
+    }
+
+    // Reset button
+    sf::RectangleShape resetButton({100, 40});
+    resetButton.setFillColor(sf::Color(220, 220, 220));
+    resetButton.setPosition({win_width / 2 - 50, win_height - 280});
+    sf::Text resetText(font);
+    resetText.setString("Reset");
+    resetText.setFillColor(sf::Color::Black);
+    resetText.setPosition({win_width / 2 - 30, win_height - 270});
+
+    // Array size controls
+    sf::RectangleShape plusSizeBtn({30, 30});
+    plusSizeBtn.setFillColor(sf::Color(180, 255, 180));
+    plusSizeBtn.setPosition({win_width - 160, 20});
+    sf::Text plusSizeText(font);
+    plusSizeText.setString("+");
+    plusSizeText.setFillColor(sf::Color::Black);
+    plusSizeText.setPosition({win_width - 152, 18});
+
+    sf::RectangleShape minusSizeBtn({30, 30});
+    minusSizeBtn.setFillColor(sf::Color(255, 180, 180));
+    minusSizeBtn.setPosition({win_width - 200, 20});
+    sf::Text minusSizeText(font);
+    minusSizeText.setString("-");
+    minusSizeText.setFillColor(sf::Color::Black);
+    minusSizeText.setPosition({win_width - 192, 18});
+
+    sf::Text sizeLabel(font);
+    sizeLabel.setFillColor(sf::Color::Black);
+    sizeLabel.setCharacterSize(18);
+    sizeLabel.setPosition({win_width - 250, 22});
+
+    // Speed controls
+    sf::RectangleShape plusSpeedBtn({30, 30});
+    plusSpeedBtn.setFillColor(sf::Color(180, 180, 255));
+    plusSpeedBtn.setPosition({win_width - 160, 60});
+    sf::Text plusSpeedText(font);
+    plusSpeedText.setString("+");
+    plusSpeedText.setFillColor(sf::Color::Black);
+    plusSpeedText.setPosition({win_width - 152, 58});
+
+    sf::RectangleShape minusSpeedBtn({30, 30});
+    minusSpeedBtn.setFillColor(sf::Color(255, 220, 180));
+    minusSpeedBtn.setPosition({win_width - 200, 60});
+    sf::Text minusSpeedText(font);
+    minusSpeedText.setString("-");
+    minusSpeedText.setFillColor(sf::Color::Black);
+    minusSpeedText.setPosition({win_width - 192, 58});
+
+    sf::Text speedLabel(font);
+    speedLabel.setFillColor(sf::Color::Black);
+    speedLabel.setCharacterSize(18);
+    speedLabel.setPosition({win_width - 250, 62});
+
+    // Main event loop
     while (window.isOpen()) {
-       
-        while ( std::optional event=window.pollEvent()) {
+        while (std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
-                
                 window.close();
 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                // Check which sort button was clicked
+                for (int i = 0; i < 4; ++i) {
+                    if (sortButtons[i].first.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                        selectedSort = static_cast<SortType>(i + 1);
+                    }
+                }
+                // Check if start button was clicked
                 if (startButton.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
                     sortingStarted = true;
+                }
+                // Check if reset button was clicked
+                if (resetButton.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                    arr = rand_array(n);
+                    rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
+                }
+                // Array size + and -
+                if (plusSizeBtn.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                    if (n < max_n) {
+                        ++n;
+                        arr = rand_array(n);
+                        rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
+                    }
+                }
+                if (minusSizeBtn.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                    if (n > min_n) {
+                        --n;
+                        arr = rand_array(n);
+                        rectangles = draw_rectangles(arr.data(), n, win_width, win_height);
+                    }
+                }
+                // Speed + and -
+                if (plusSpeedBtn.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                    if (speed < max_speed) {
+                        speed += 5;
+                    }
+                }
+                if (minusSpeedBtn.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)})) {
+                    if (speed > min_speed) {
+                        speed -= 5;
+                    }
                 }
             }
         }
 
-       
-         window.clear();
+        window.clear();
+        // Update the labels for size and speed
+        sizeLabel.setString("Size: " + std::to_string(n));
+        speedLabel.setString("Speed: " + std::to_string(speed) + " ms");
 
-        // Draw rectangles
+        // Draw the array bars
         for (const auto& rect : rectangles) {
             window.draw(rect);
         }
 
-        // Draw start button and text
+        // Draw the UI controls
         window.draw(startButton);
         window.draw(startText);
-      
+        for (int i = 0; i < 4; ++i) {
+            if (selectedSort == static_cast<SortType>(i + 1))
+                sortButtons[i].first.setFillColor(sf::Color(100, 200, 255));
+            else
+                sortButtons[i].first.setFillColor(sf::Color(200, 200, 200));
+            window.draw(sortButtons[i].first);
+            window.draw(sortButtons[i].second);
+        }
+        window.draw(resetButton);
+        window.draw(resetText);
+        window.draw(plusSizeBtn);
+        window.draw(plusSizeText);
+        window.draw(minusSizeBtn);
+        window.draw(minusSizeText);
+        window.draw(sizeLabel);
+        window.draw(plusSpeedBtn);
+        window.draw(plusSpeedText);
+        window.draw(minusSpeedBtn);
+        window.draw(minusSpeedText);
+        window.draw(speedLabel);
+
         window.display();
 
-        // Start sorting if button was clicked
+        // Run the selected sort when Start is pressed
         if (sortingStarted) {
-            //implementing switch to choose sorting algorithm
-            std::cout << "Choose sorting algorithm:\n1. Bubble Sort\n2. Selection Sort\n3. Insertion Sort\n4. Merge Sort\n";
-            int choice;
-            std::cin >> choice;
-  
-            switch (choice) {
-                case 1:
-                    std::cout << "Bubble Sort selected\n";
-                    bubble_sort(arr.data(), rectangles, window, win_height);
+            switch (selectedSort) {
+                case SortType::Bubble:
+                    bubble_sort(arr.data(), rectangles, window, win_height, sortingSound, speed);
                     break;
-                case 2:
-                    std::cout << "Selection Sort selected\n";
-                    selection_sort(arr.data(), rectangles, window, win_height);
+                case SortType::Selection:
+                    selection_sort(arr.data(), rectangles, window, win_height, sortingSound, speed);
                     break;
-                case 3:
-                    std::cout << "Insertion Sort selected\n";
-                    insertion_sort(arr.data(), rectangles, window, win_height);    
+                case SortType::Insertion:
+                    insertion_sort(arr.data(), rectangles, window, win_height, sortingSound, speed);
                     break;
-                case 4:
-                    std::cout << "Merge Sort selected\n";
-                    merge_sort_visualization(arr.data(), rectangles, window, win_height, 0, n - 1);
+                case SortType::Merge:
+                    merge_sort_visualization(arr.data(), rectangles, window, win_height, 0, n - 1, sortingSound, speed);
                     break;
                 default:
-                    std::cout << "Invalid choice, defaulting to Bubble Sort\n";
-                    bubble_sort(arr.data(), rectangles, window, win_height);
-                    
+                    bubble_sort(arr.data(), rectangles, window, win_height, sortingSound, speed);
             }
-        
-
             sortingStarted = false;
         }
-      
     }
-
 
     return 0;
 }
