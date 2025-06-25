@@ -171,12 +171,6 @@ Sorting-Visualizer/
 
 > Please follow clean coding practices and document your code where necessary.
 
----
-
-## 📝 License
-
-This project is licensed under the **MIT License**.
-See [`LICENSE`](LICENSE) for details.
 
 ---
 
