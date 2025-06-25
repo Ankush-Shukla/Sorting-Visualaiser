@@ -8,16 +8,15 @@ An interactive and educational **Sorting Visualizer** built with **C++** and **S
 
 1. [Features](#-features)
 2. [Algorithms Included](#-algorithms-included)
-3. [Demo](#-demo)
-4. [Prerequisites](#-prerequisites)
-5. [Installation & Build](#-installation--build)
-6. [Usage](#-usage)
+3. [Prerequisites](#-prerequisites)
+4. [Installation & Build](#-installation--build)
+5. [Usage](#-usage)
 
    * [Controls](#controls)
-7. [Project Structure](#-project-structure)
-8. [Contributing](#-contributing)
-9. [License](#-license)
-10. [Acknowledgments](#-acknowledgments)
+6. [Project Structure](#-project-structure)
+7. [Contributing](#-contributing)
+8. [License](#-license)
+9. [Acknowledgments](#-acknowledgments)
 
 ---
 
@@ -39,12 +38,6 @@ An interactive and educational **Sorting Visualizer** built with **C++** and **S
 * Insertion Sort
 * Merge Sort
 * Quick Sort
-
----
-
-## 🎬 Demo
-
-![Sorting Visualizer Demo](assets/demo.gif)
 
 ---
 
